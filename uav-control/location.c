@@ -131,6 +131,100 @@ static void *radio_thread(void *arg)
 }
 
 // -----------------------------------------------------------------------------
+static void *inertial_thread(void *arg)
+{   
+    globals.inertial_enabled = 1;
+    location_args_t *data = (location_args_t *)arg;
+    location_coords_t coords;
+    video_data_t vid_data;
+    unsigned long buff_sz = 0;
+    uint8_t *jpg_buf = NULL, *rgb_buff = NULL;
+    int delta, frames_computed = 0, location_fps = 0, streaming_fps = 0;
+    struct timespec t0, t1, tc;
+    
+    clock_gettime(CLOCK_REALTIME, &t0);
+    while (data->inertial_enabled) {
+        // lock the colordetect parameters and determine our location fps
+        pthread_mutex_lock(&data->inertial_lock);
+        /* old code
+        streaming_fps = video_get_fps();
+        location_fps = MIN(data->radio_rate, streaming_fps);
+        */
+        location_fps = data->inertial_rate;
+        pthread_mutex_unlock(&data->inertial_lock);
+        
+        // if location is disable - sleep and check for a change every second
+        if (location_fps <= 0 || globals.inertial_enabled == 0) {
+            sleep(1);
+            continue;
+        }
+        
+        
+        // LOCATION TODO: insert code to retrieve IMU data
+        //                remember to lock on that data. See example code below
+        
+        /*
+        Code to retrieve video data
+        // make synchronous frame read -- sleep for a second and retry on fail
+        if (!video_lock(&vid_data, ACCESS_SYNC)) {
+            syslog(LOG_ERR, "colordetect failed to lock frame\n");
+            sleep(1);
+            continue;
+        }
+
+        clock_gettime(CLOCK_REALTIME, &tc);
+        delta = timespec_delta(&t0, &tc);
+        if (((frames_computed * 1000000) / delta) >= location_fps) {
+            video_unlock();
+            continue;
+        }
+
+        // copy the jpeg to our buffer now that we're safely locked
+        if (buff_sz < vid_data.length) {
+            free(jpg_buf);
+            buff_sz = vid_data.length;
+            jpg_buf = (uint8_t *)malloc(buff_sz);
+        }
+
+        memcpy(jpg_buf, vid_data.data, vid_data.length);     
+        video_unlock();
+        */
+
+        // LOCATION TODO: do processing to determine location according to IMU
+        //                store results in local coords member
+        
+        /* Old Code
+        if (0 != jpeg_rd_mem(jpg_buf, buff_sz, &rgb_buff,
+                             &coords.width, &coords.height)) {
+            colordetect_hsl_fp32(rgb_buff, &data->color, &coords);
+            frames_computed++;
+        }
+        */
+
+        pthread_mutex_lock(&data->inertial_lock);
+
+        // copy over the updated coordinates to the global struct
+        globals.inertial_coords = coords;
+
+        // inform any listeners that new data is available
+        pthread_cond_broadcast(&globals.inertial_cond);
+        pthread_mutex_unlock(&data->inertial_lock);
+
+        if (frames_computed >= streaming_fps) {
+            // every time we hit the streaming fps, dump out the location rate
+            clock_gettime(CLOCK_REALTIME, &t1);
+            real_t delta = timespec_delta(&t0, &t1) / (real_t)1000000;
+            syslog(LOG_INFO, "location fps: %f\n", streaming_fps / delta);
+            frames_computed = 0;
+            t0 = t1;
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
+
+// -----------------------------------------------------------------------------
 int location_init(client_info_t *client)
 {   
     int rc;
@@ -143,38 +237,45 @@ int location_init(client_info_t *client)
     memset(&globals, 0, sizeof(globals));
 
     globals.running = 1;
-    globals.location = 1;
+    globals.radio_enabled = 1;
+    globals.inertial_enabled = 1;
     globals.client = client;
 
-    // set initial color value to track
-    globals.color.r = 159;
-    globals.color.g = 39;
-    globals.color.b = 100;
-
     // set initial location threshold values
-    globals.color.ht = 10;
-    globals.color.st = 20;
-    globals.color.lt = 30;
-    globals.color.filter = 10;
+    // LOCATION TODO: set initial coordinates
 
     if (0 != (rc = pthread_mutex_init(&globals.lock, NULL))) {
         syslog(LOG_ERR, "error creating colordetect param mutex (%d)", rc);
         return 0;
     }
 
-    if (0 != (rc = pthread_mutex_init(&globals.coord_lock, NULL))) {
-        syslog(LOG_ERR, "error creating colordetect coord mutex (%d)", rc);
+    if (0 != (rc = pthread_mutex_init(&globals.radio_lock, NULL))) {
+        syslog(LOG_ERR, "error creating radio coord mutex (%d)", rc);
         return 0;
     }
 
-    if (0 != (rc = pthread_cond_init(&globals.coord_cond, NULL))) {
-        syslog(LOG_ERR, "error creating location event condition (%d)", rc);
+    if (0 != (rc = pthread_cond_init(&globals.radio_cond, NULL))) {
+        syslog(LOG_ERR, "error creating radio location event condition (%d)", rc);
         return 0;
     }
 
-    // create and kick off the color location thread
-    pthread_create(&globals.thread, 0, location_thread, &globals);
-    pthread_detach(globals.thread);
+    if (0 != (rc = pthread_mutex_init(&globals.inertial_lock, NULL))) {
+        syslog(LOG_ERR, "error creating IMU coord mutex (%d)", rc);
+        return 0;
+    }
+
+    if (0 != (rc = pthread_cond_init(&globals.inertial_cond, NULL))) {
+        syslog(LOG_ERR, "error creating IMU location event condition (%d)", rc);
+        return 0;
+    }
+
+    // create and kick off the radio location thread
+    pthread_create(&globals.radio_thread, 0, radio_thread, &globals);
+    pthread_detach(globals.radio_thread);
+    
+    // create and kick off the IMU location thread
+    pthread_create(&globals.inertial_thread, 0, inertial_thread, &globals);
+    pthread_detach(globals.inertial_thread);
 
     return 1;
 }
@@ -188,10 +289,13 @@ void location_shutdown(void)
     }
 
     globals.running = 0;
-    pthread_cancel(globals.thread);
+    pthread_cancel(globals.radio_thread);
+    pthread_cancel(globals.inertial_thread);
     pthread_mutex_destroy(&globals.lock);
-    pthread_mutex_destroy(&globals.coord_lock);
-    pthread_cond_destroy(&globals.coord_cond);
+    pthread_mutex_destroy(&globals.radio_lock);
+    pthread_cond_destroy(&globals.radio_cond);
+    pthread_mutex_destroy(&globals.inertial_lock);
+    pthread_cond_destroy(&globals.inertial_cond);
 }
 
 // -----------------------------------------------------------------------------
