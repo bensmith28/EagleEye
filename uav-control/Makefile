@@ -46,6 +46,7 @@ OBJ_FILES = cmdline.o \
             razor_imu.o \
             readwritejpeg.o \
             tracking.o \
+            location.o \
             uav_control.o \
             utility.o \
             v4l2uvc.o \

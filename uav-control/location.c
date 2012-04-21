@@ -11,9 +11,7 @@
 #include <pthread.h>
 #include <syslog.h>
 #include <time.h>
-#include "readwritejpeg.h"
 #include "uav_protocol.h"
-#include "video_uvc.h"
 #include "location.h"
 
 typedef struct location_args
@@ -299,51 +297,53 @@ void location_shutdown(void)
 }
 
 // -----------------------------------------------------------------------------
-void location_set_enable(int enabled)
+void location_radio_enable(int enabled)
 {
-    globals.location = enabled;    
-    syslog(LOG_INFO, "Color location Enabled Set to:%d\n",enabled);    
+    globals.radio_enabled = enabled;    
+    syslog(LOG_INFO, "Radio Localization Enabled Set to:%d\n",enabled);    
 }
 
 // -----------------------------------------------------------------------------
-int location_get_enable()
+void location_inertial_enable(int enabled)
+{
+    globals.inertial_enabled = enabled;    
+    syslog(LOG_INFO, "Inertial Localization Enabled Set to:%d\n",enabled);    
+}
+
+// -----------------------------------------------------------------------------
+int location_radio_get_enable()
 {    
-    return globals.location;
-}
-// -----------------------------------------------------------------------------
-void location_set_color(track_color_t *color)
-{
-    globals.color = *color;
+    return globals.radio_enabled;
 }
 
 // -----------------------------------------------------------------------------
-track_color_t location_get_color(void)
-{
-    return globals.color;
+int location_inertial_get_enable()
+{    
+    return globals.inertial_enabled;
 }
 
 //------------------------------------------------------------------------------
-void location_set_fps(unsigned int fps)
+void location_radio_set_rate(unsigned int rate)
 {
     pthread_mutex_lock(&globals.lock);
-    globals.locationRate = fps;
+    globals.radio_rate = rate;
     pthread_mutex_unlock(&globals.lock);
 }
 
 //------------------------------------------------------------------------------
-unsigned int location_get_fps()
+unsigned int location_inertial_set_rate()
 {
     unsigned int rval;
     pthread_mutex_lock(&globals.lock);
-    rval = globals.locationRate;
+    rval = globals.inertial_rate;
     pthread_mutex_unlock(&globals.lock);
     return rval;
 }
 
 //------------------------------------------------------------------------------
-int location_read_state(track_coords_t *coords, access_mode_t mode)
+int location_radio_read_state(location_coords_t *coords, access_mode_t mode)
 {
-    pthread_mutex_lock(&globals.coord_lock);
+    pthread_mutex_lock(&globals.radio_lock);
 
     switch (mode) {
     case ACCESS_ASYNC:
@@ -351,17 +351,42 @@ int location_read_state(track_coords_t *coords, access_mode_t mode)
         break;
     case ACCESS_SYNC:
         // access in a synchronous (blocking) fashion
-        pthread_cond_wait(&globals.coord_cond, &globals.coord_lock);
+        pthread_cond_wait(&globals.radio_cond, &globals.radio_lock);
         break;
     default:
-        pthread_mutex_unlock(&globals.coord_lock);
-        memset(coords, 0, sizeof(track_coords_t));
+        pthread_mutex_unlock(&globals.radio_lock);
+        memset(coords, 0, sizeof(location_coords_t));
         syslog(LOG_ERR, "location_read_state: invalid access mode\n");
         return 0;
     }
 
-    *coords = globals.coords;
-    pthread_mutex_unlock(&globals.coord_lock);
+    *coords = globals.radio_coords;
+    pthread_mutex_unlock(&globals.radio_lock);
+    return 1;
+}
+
+//------------------------------------------------------------------------------
+int location_inertial_read_state(location_coords_t *coords, access_mode_t mode)
+{
+    pthread_mutex_lock(&globals.inertial_lock);
+
+    switch (mode) {
+    case ACCESS_ASYNC:
+        // access in an asynchronous (non-blocking) fashion
+        break;
+    case ACCESS_SYNC:
+        // access in a synchronous (blocking) fashion
+        pthread_cond_wait(&globals.inertial_cond, &globals.inertial_lock);
+        break;
+    default:
+        pthread_mutex_unlock(&globals.inertial_lock);
+        memset(coords, 0, sizeof(location_coords_t));
+        syslog(LOG_ERR, "location_read_state: invalid access mode\n");
+        return 0;
+    }
+
+    *coords = globals.inertail_coords;
+    pthread_mutex_unlock(&globals.inertial_lock);
     return 1;
 }
 

@@ -9,43 +9,43 @@
 #ifndef _UAV_location__H_
 #define _UAV_location__H_
 
-#include "colordetect.h"
+#include "position.h"
 #include "utility.h"
 
-// TODO: describe me
+// Initializes and starts the threads for the two localization techniques
 int location_init(client_info_t *client);
 
-// TODO: describe me
+// Shuts down and cleans up the localization threads
 void location_shutdown(void);
 
-// TODO: describe me
+// Sets enable for radio localization
 void location_radio_enable(int enabled);
 
-// TODO: describe me
+// Sets enable for inertial localization
 void location_inertial_enable(int enabled);
 
-// TODO: describe me
+// Sets the frequency of localization for radio
 void location_radio_set_rate(unsigned int rate);
 
-// TODO: describe me
+// Sets the frequency of localization for inertial
 void location_inertial_set_rate(unsigned int rate);
 
-// TODO: describe me
+// Retreives the frequency of localization for radio
 unsigned int location_radio_get_rate(void);
 
-// TODO: describe me
+// Retreives the frequency of localization for inertial
 unsigned int location_inertial_get_rate(void);
 
-// TODO: describe me
+// Retrievs a copy of coordinates from globals for position reported by radio
 int location_radio_read_state(track_coords_t *coords, access_mode_t mode);
 
-// TODO: describe me
+// Retrievs a copy of coordinates from globals for position reported by radio
 int location_inertial_read_state(track_coords_t *coords, access_mode_t mode);
 
-// return current location state
+// return current location enable state for radio
 int location_radio_get_enable();
 
-// return current location state
+// return current location enable state for radio
 int location_inertial_get_enable();
 
 #endif // _UAV_location__H_

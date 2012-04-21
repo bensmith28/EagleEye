@@ -18,6 +18,7 @@ typedef struct {
     int x, y;       // center coordinate
 } location_coords_t;
 
+/* Integrated into threads for radio and inertial
 // determine position, uses inertial updates to last known location
 void position_intertial(const uint8_t *rgb_in,
         const track_color_t *color, track_coords_t *box);
@@ -25,6 +26,7 @@ void position_intertial(const uint8_t *rgb_in,
 // determine position, uses last reported position from location service
 void position_radio(const uint8_t *rgb_in, real_t threshold,
         const track_color_t *color, track_coords_t *box);
+*/
 
 #endif // _UAV_position__H_
 
