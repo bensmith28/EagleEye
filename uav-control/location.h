@@ -37,10 +37,10 @@ unsigned int location_radio_get_rate(void);
 unsigned int location_inertial_get_rate(void);
 
 // Retrievs a copy of coordinates from globals for position reported by radio
-int location_radio_read_state(track_coords_t *coords, access_mode_t mode);
+int location_radio_read_state(location_coords_t *coords, access_mode_t mode);
 
 // Retrievs a copy of coordinates from globals for position reported by radio
-int location_inertial_read_state(track_coords_t *coords, access_mode_t mode);
+int location_inertial_read_state(location_coords_t *coords, access_mode_t mode);
 
 // return current location enable state for radio
 int location_radio_get_enable();

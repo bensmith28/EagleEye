@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <syslog.h>
 #include <time.h>
+#include <unistd.h>
 #include "uav_protocol.h"
 #include "location.h"
 
@@ -25,7 +26,7 @@ typedef struct location_args
     pthread_t       radio_thread;     // handle to location service thread
     pthread_t       inertial_thread;  // handle to IMU location estimation thread
     unsigned int    radio_rate;
-    unsigned int    inertial_rate
+    unsigned int    inertial_rate;
     pthread_mutex_t lock;
     pthread_mutex_t radio_lock;
     pthread_cond_t  radio_cond;
@@ -41,11 +42,11 @@ static void *radio_thread(void *arg)
     globals.radio_enabled = 1;
     location_args_t *data = (location_args_t *)arg;
     location_coords_t coords;
-    video_data_t vid_data;
-    unsigned long buff_sz = 0;
-    uint8_t *jpg_buf = NULL, *rgb_buff = NULL;
-    int delta, frames_computed = 0, location_fps = 0, streaming_fps = 0;
-    struct timespec t0, t1, tc;
+    //video_data_t vid_data;
+    // unsigned long buff_sz = 0;
+    // uint8_t *jpg_buf = NULL, *rgb_buff = NULL;
+    int /* delta, */ frames_computed = 0, location_fps = 0, streaming_fps = 0;
+    struct timespec t0, t1; //, tc;
     
     clock_gettime(CLOCK_REALTIME, &t0);
     while (data->radio_enabled) {
@@ -134,11 +135,11 @@ static void *inertial_thread(void *arg)
     globals.inertial_enabled = 1;
     location_args_t *data = (location_args_t *)arg;
     location_coords_t coords;
-    video_data_t vid_data;
-    unsigned long buff_sz = 0;
-    uint8_t *jpg_buf = NULL, *rgb_buff = NULL;
-    int delta, frames_computed = 0, location_fps = 0, streaming_fps = 0;
-    struct timespec t0, t1, tc;
+    // video_data_t vid_data;
+    // unsigned long buff_sz = 0;
+    // uint8_t *jpg_buf = NULL, *rgb_buff = NULL;
+    int /* delta, */ frames_computed = 0, location_fps = 0, streaming_fps = 0;
+    struct timespec t0, t1; // , tc;
     
     clock_gettime(CLOCK_REALTIME, &t0);
     while (data->inertial_enabled) {
@@ -331,13 +332,11 @@ void location_radio_set_rate(unsigned int rate)
 }
 
 //------------------------------------------------------------------------------
-unsigned int location_inertial_set_rate()
+void location_inertial_set_rate(unsigned int rate)
 {
-    unsigned int rval;
     pthread_mutex_lock(&globals.lock);
-    rval = globals.inertial_rate;
+    globals.inertial_rate = rate;
     pthread_mutex_unlock(&globals.lock);
-    return rval;
 }
 
 //------------------------------------------------------------------------------
@@ -385,7 +384,7 @@ int location_inertial_read_state(location_coords_t *coords, access_mode_t mode)
         return 0;
     }
 
-    *coords = globals.inertail_coords;
+    *coords = globals.inertial_coords;
     pthread_mutex_unlock(&globals.inertial_lock);
     return 1;
 }

@@ -1,2 +1,1 @@
-location.o: location.c uav_protocol.h \
-  utility.h location.h colordetect.h
+location.o: location.c uav_protocol.h location.h position.h utility.h
