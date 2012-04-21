@@ -68,6 +68,9 @@ $(APPNAME) : $(OBJ_FILES)
 clean:
 	@rm -rf $(APPNAME) *.o *.d 
 
+install: $(APPNAME)
+	@cp -fv $(APPNAME) /usr/sbin/$(APPNAME)
+
 ifneq ($(DEP_FILES),)
 ifeq ($(strip $(filter clean%, $(MAKECMDGOALS))),)
 -include $(DEP_FILES)
