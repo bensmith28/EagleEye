@@ -31,6 +31,8 @@
 #include "user-gpio.h"
 #include "video_uvc.h"
 #include "utility.h"
+#include "position.h"
+#include "location.h"
 
 #define MUX_SEL_UPROC 0
 #define MUX_SEL_RADIO 1
@@ -214,7 +216,7 @@ static void *location_mon_thread(void *arg)
             memset(cmd_buffer, 0, PKT_POS_LENGTH);
             cmd_buffer[PKT_COMMAND]   = SERVER_UPDATE_LOCATION;
             cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
-            cmd_buffer[PKT_POS_STATE] = POS_STATE_UNKOWN;
+            cmd_buffer[PKT_POS_STATE] = POS_STATE_UNKNOWN;
             send_packet(&g_client, cmd_buffer, PKT_CTS_LENGTH);
 
             was_tracking = 0;

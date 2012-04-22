@@ -93,7 +93,7 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
         { "no-fc",      no_argument,       &opts->no_fc,    1 },
         { "no-gpio",    no_argument,       &opts->no_gpio,  1 },
         { "no-track",   no_argument,       &opts->no_track, 1 },
-        { "no-location",no_argument,       &opts->no_location, 1};
+        { "no-location",no_argument,       &opts->no_location, 1},
         { "no-video",   no_argument,       &opts->no_video, 1 },
         { 0, 0, 0, 0 }
     };
@@ -108,7 +108,7 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
     opts->vid_height = DEFAULT_HEIGHT;
     opts->vid_fps    = DEFAULT_FPS;
     opts->track_fps  = DEFAULT_TRACK;
-    opts->location_rate = DEFAULE_LOC_RATE;
+    opts->location_rate = DEFAULT_LOC_RATE;
     opts->mux        = DEFAULT_GPIO_MUX;
     opts->uss        = DEFAULT_GPIO_USS;
     opts->ovr        = DEFAULT_GPIO_OVR;
@@ -204,7 +204,7 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
             opts->track_fps = atoi(optarg);
             break;
         case 'L':
-            opts-location_rate = atoi(optarg);
+            opts->location_rate = atoi(optarg);
             break;
         case 'D':
             opts->daemonize = 1;
