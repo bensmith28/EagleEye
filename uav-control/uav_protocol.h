@@ -32,6 +32,7 @@
 #define SERVER_UPDATE_STATE     14
 #define SERVER_ACK_TCE          15   // acknowledge track control enable
 #define SERVER_ACK_CTE          16   // acknowledge track control enable
+#define SERVER_UPDATE_LOCATION  17   // send updated location state information
 
 // Packet commands from client to server
 
@@ -132,6 +133,21 @@
 #define PKT_CTS_YC          (PKT_BASE + 6)
 #define PKT_CTS_NUM         (PKT_BASE + 7)
 #define PKT_CTS_LENGTH      (sizeof(uint32_t) * PKT_CTS_NUM)
+
+// Location service state
+
+#define POS_STATE_UNKNOWN   0x00000001      // position unknown
+#define POS_STATE_KNOWN     0x00000002      // position known
+
+#define PKT_POS_STATE       (PKT_BASE + 0)
+#define PKT_POS_X           (PKT_BASE + 1)
+#define PKT_POS_Y           (PKT_BASE + 2)
+#define PKT_POS_NUM         (PKT_BASE + 3)
+#define PKT_POS_LENGTH      (sizeof(uint32_t) * PKT_POS_NUM)
+
+#define PKT_POSEN_STATUS    (PKT_BASE + 0)
+#define PKT_POSEN_NUM       (PKT_BASE + 1)
+#define PKT_POSEN_LENGTH    (sizeof(uint32_t) * PKT_POSEN_NUM)
 
 // Flight control state
 

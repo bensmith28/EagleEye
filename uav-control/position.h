@@ -14,7 +14,8 @@
 #include <time.h>
 
 typedef struct {
-    int tol;        // tolerance of coordinate
+    //int tol;        // tolerance of coordinate
+    int detected;   // 0 when locations is not known
     int x, y;       // center coordinate
 } location_coords_t;
 

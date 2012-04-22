@@ -181,6 +181,51 @@ static void *track_mon_thread(void *arg)
 }
 
 // -----------------------------------------------------------------------------
+// Wake up whenever the location service subsystem produces an updated location
+// state. Transmit the location status back to the UI.
+static void *location_mon_thread(void *arg)
+{
+    uint32_t cmd_buffer[16];
+    location_coords_t coords;
+    int was_tracking = 0;
+
+    for (;;) {
+        // block until the tracking subsystem provides an updated bounding box
+        if (!location_radio_read_state(&coords, ACCESS_SYNC))
+            continue;
+
+        if (coords.detected) {
+            // we've detected an object, send the updated bounding box
+            cmd_buffer[PKT_COMMAND]   = SERVER_UPDATE_LOCATION;
+            cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
+            cmd_buffer[PKT_CTS_STATE] = POS_STATE_KNOWN;
+            cmd_buffer[PKT_POS_X]     = (uint32_t)coords.x;
+            cmd_buffer[PKT_POS_Y]     = (uint32_t)coords.y;
+            send_packet(&g_client, cmd_buffer, PKT_POS_LENGTH);
+
+            if (!was_tracking) {
+                was_tracking = 1;
+                syslog(LOG_INFO, "acquired location: (%d,%d)\n",
+                        coords.x, coords.y);
+            }
+        }
+        else if (was_tracking) {
+            // this means we were tracking, but lost our target. tell the client
+            memset(cmd_buffer, 0, PKT_POS_LENGTH);
+            cmd_buffer[PKT_COMMAND]   = SERVER_UPDATE_LOCATION;
+            cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
+            cmd_buffer[PKT_POS_STATE] = POS_STATE_UNKOWN;
+            send_packet(&g_client, cmd_buffer, PKT_CTS_LENGTH);
+
+            was_tracking = 0;
+            syslog(LOG_INFO, "lost location\n");
+        }
+    }
+
+    pthread_exit(NULL);
+}
+
+// -----------------------------------------------------------------------------
 // Wake up whenever the flight subsystem changes state, send update packet.
 static void *state_mon_thread(void *arg)
 {
@@ -862,6 +907,25 @@ int main(int argc, char *argv[])
         }
         else {
             syslog(LOG_INFO, "color tracking not possible without video");
+        }
+    }
+    
+    // initialize location service subsystem
+    if (!opts.no_location) {
+        // make a note that tracking isn't possible with video
+        syslog(LOG_INFO, "initializing location subsystem\n");
+        if (!location_init(&g_client)) {
+            syslog(LOG_ERR, "failed to initialize location service subsystem\n");
+            uav_shutdown(EXIT_FAILURE);
+        }
+
+        // set the initial location service rate
+        location_radio_set_rate(opts.location_rate);
+
+        // initialize the battery monitor thread
+        if (0 != pthread_create(&g_track_thrd, NULL, location_mon_thread, 0)) {
+            syslog(LOG_ERR, "failed to create location service monitor thread");
+            uav_shutdown(EXIT_FAILURE);
         }
     }
 

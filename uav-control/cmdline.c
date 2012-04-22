@@ -32,6 +32,7 @@ static void print_usage(void)
            "  -y, --height=NUM          specify resolution height for webcam\n"
            "  -f, --fps=NUM             specify capture framerate for webcam\n"
            "  -F, --track-fps=NUM       specify color tracking framerate\n"
+           "  -L, --location-rate=NUM   specify a rate for location service\n"
            "  -D, --daemonize           run as a background process\n"
            "  -V, --verbose             enable verbose logging\n"
            "  -h, --help                display this usage message\n"
@@ -39,6 +40,7 @@ static void print_usage(void)
            "      --no-fc               do not enable autonomous flight\n"
            "      --no-gpio             do not perform any gpio processing\n"
            "      --no-track            do not perform color tracking\n"
+           "      --no-location         do not perform location service\n"
            "      --no-video            do not capture video from webcam\n"
            "      --AXIS-PARAM=NUM      specify value to set for an axis\n"
            "                            AXIS = yaw | pitch | roll | alt\n"
@@ -63,6 +65,7 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
         { "height",     required_argument, NULL, 'y' },
         { "fps",        required_argument, NULL, 'f' },
         { "track-fps",  required_argument, NULL, 'F' },
+        { "location-rate",required_argument,NULL,'L' },
         { "yaw-trim",   required_argument, NULL, OPT_YAW_TRIM },
         { "yaw-kp",     required_argument, NULL, OPT_YAW_KP },
         { "yaw-ki",     required_argument, NULL, OPT_YAW_KI },
@@ -90,6 +93,7 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
         { "no-fc",      no_argument,       &opts->no_fc,    1 },
         { "no-gpio",    no_argument,       &opts->no_gpio,  1 },
         { "no-track",   no_argument,       &opts->no_track, 1 },
+        { "no-location",no_argument,       &opts->no_location, 1};
         { "no-video",   no_argument,       &opts->no_video, 1 },
         { 0, 0, 0, 0 }
     };
@@ -104,6 +108,7 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
     opts->vid_height = DEFAULT_HEIGHT;
     opts->vid_fps    = DEFAULT_FPS;
     opts->track_fps  = DEFAULT_TRACK;
+    opts->location_rate = DEFAULE_LOC_RATE;
     opts->mux        = DEFAULT_GPIO_MUX;
     opts->uss        = DEFAULT_GPIO_USS;
     opts->ovr        = DEFAULT_GPIO_OVR;
@@ -197,6 +202,9 @@ int cmdline_parse(int argc, char *argv[], cmdline_opts_t *opts)
             break;
         case 'F':
             opts->track_fps = atoi(optarg);
+            break;
+        case 'L':
+            opts-location_rate = atoi(optarg);
             break;
         case 'D':
             opts->daemonize = 1;

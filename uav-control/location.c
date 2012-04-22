@@ -237,14 +237,15 @@ int location_init(client_info_t *client)
 
     globals.running = 1;
     globals.radio_enabled = 1;
-    globals.inertial_enabled = 1;
+    // Locked out inertial enabled, because IMU not outputing xyz data
+    globals.inertial_enabled = 0;
     globals.client = client;
 
     // set initial location threshold values
     // LOCATION TODO: set initial coordinates
 
     if (0 != (rc = pthread_mutex_init(&globals.lock, NULL))) {
-        syslog(LOG_ERR, "error creating colordetect param mutex (%d)", rc);
+        syslog(LOG_ERR, "error creating location param mutex (%d)", rc);
         return 0;
     }
 

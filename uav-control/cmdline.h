@@ -16,6 +16,7 @@
 #define DEFAULT_HEIGHT      240
 #define DEFAULT_FPS         15
 #define DEFAULT_TRACK       5
+#define DEFAULT_LOC_RATE    1
 
 #define DEFAULT_GPIO_MUX    170
 #define DEFAULT_GPIO_USS    171
@@ -78,12 +79,14 @@ typedef struct cmdline_opts {
     int no_video;
     int no_gpio;
     int no_track;
+    int no_location;
     int no_fc;
     int port;
     int vid_width;
     int vid_height;
     int vid_fps;
     int track_fps;
+    int location_rate;
     int mux;
     int uss;
     int ovr;
