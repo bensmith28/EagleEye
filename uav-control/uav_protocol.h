@@ -33,7 +33,7 @@
 #define SERVER_ACK_TCE          15   // acknowledge track control enable
 #define SERVER_ACK_CTE          16   // acknowledge track control enable
 #define SERVER_UPDATE_LOCATION  17   // send updated location state information
-
+f
 // Packet commands from client to server
 
 #define CLIENT_ACK_IDENT        0   // identify self to server
@@ -55,6 +55,9 @@
 #define CLIENT_REQ_GPIDS        16  // request get PID settings
 #define CLIENT_REQ_TCE          17  // request Tracking Control Enable
 #define CLIENT_REQ_CTE          18  // request Color Tracking Enable
+#define CLIENT_REQ_POS          19  // request current position
+#define CLIENT_REQ_POSE         20  // request Location Service Enable
+#define CLIENT_REQ_NEW_WPT      21  // request addition of new waypoint
 
 // General packet offsets
 
@@ -145,9 +148,20 @@
 #define PKT_POS_NUM         (PKT_BASE + 3)
 #define PKT_POS_LENGTH      (sizeof(uint32_t) * PKT_POS_NUM)
 
+// Location Service Enable
+
 #define PKT_POSEN_STATUS    (PKT_BASE + 0)
 #define PKT_POSEN_NUM       (PKT_BASE + 1)
 #define PKT_POSEN_LENGTH    (sizeof(uint32_t) * PKT_POSEN_NUM)
+
+// Add a new waypoint to the list.
+
+#define PKT_NEW_WPT_X       (PKT_BASE + 0)
+#define PKT_NEW_WPT_Y       (PKT_BASE + 1)
+#define PKT_NEW_WPT_FUNC    (PKT_BASE + 2)
+#define PKT_NEW_WPT_ID      (PKT_BASE + 3)
+#define PKT_NEW_WPT_NUM     (PKT_BASE + 4)
+#define PKT_NEW_WPT_LENGTH  (sizeof(uint32_t) * PKT_NEW_WPT_NUM)
 
 // Flight control state
 
