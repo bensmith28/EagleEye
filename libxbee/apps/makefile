@@ -1,6 +1,7 @@
 PROG?=main
 
 all: $(PROG)
+	LD_LIBRARY_PATH=../lib ./$(PROG)
 
 new: clean all
 

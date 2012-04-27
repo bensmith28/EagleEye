@@ -42,7 +42,8 @@ APP_NAMES = evnt_test \
             madc_test \
             mjpg_test \
             pwm_test \
-            rssi_test
+            rssi_test\
+			xbee_test
 
 EVNT_OBJS = evnt_test.o
 GLES_OBJS = gles_test.o \
@@ -63,6 +64,7 @@ MJPG_OBJS = mjpg_test.o \
             $(UC)/v4l2uvc.o
 PWM_OBJS  = pwm_test.o
 RSSI_OBJS = rssi_test.o
+XBEE_OBJS = xbee_test.o
 
 OBJ_FILES = ${EVNT_OBJS} \
             ${GLES_OBJS} \
@@ -72,7 +74,8 @@ OBJ_FILES = ${EVNT_OBJS} \
             ${MADC_OBJS} \
             ${MJPG_OBJS} \
             ${PWM_OBJS} \
-            ${RSSI_OBJS}
+            ${RSSI_OBJS} \
+			$(XBEE_OBJS}
 DEP_FILES = $(strip $(OBJ_FILES:.o=.d))
 
 all: ${APP_NAMES}
@@ -112,6 +115,10 @@ pwm_test: ${PWM_OBJS}
 rssi_test: ${RSSI_OBJS}
 	@echo "[LD] $@"
 	$(CC) $(LDFLAGS) -lpthread -o $@ $^
+
+xbee_test: $XBEE_OBJS}
+	@echo "[LD] $@"
+	$(CC) $LDFLAGS) -lpthread -lxbee -o $@ $^
 
 .PHONY: %.d
 %.d: ;

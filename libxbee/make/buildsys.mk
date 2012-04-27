@@ -49,13 +49,13 @@ endef
 $(foreach dir,$(wildcard $(MANDIR)/*),$(eval $(call man_dirs,$(dir))))
 
 ### generate a list of the man pages
-SYS_MANPAGES:=
-define man_srcs
-SYS_MANPAGES+=$$(wildcard $(MANDIR)/man$(patsubst $(MANDIR)/man%,%,$1)/*.$(patsubst $(MANDIR)/man%,%,$1))
-endef
-$(foreach dir,$(MAN_DIRS),$(eval $(call man_srcs,$(dir))))
-SYS_MANPAGES:=$(patsubst $(MANDIR)/%,%,$(SYS_MANPAGES))
-SYS_HTMLPAGES:=$(addsuffix .html,$(SYS_MANPAGES)) index.html
+#SYS_MANPAGES:=
+#define man_srcs
+#SYS_MANPAGES+=$$(wildcard $(MANDIR)/man$(patsubst $(MANDIR)/man%,%,$1)/*.$(patsubst $(MANDIR)/man%,%,$1))
+#endef
+#$(foreach dir,$(MAN_DIRS),$(eval $(call man_srcs,$(dir))))
+#SYS_MANPAGES:=$(patsubst $(MANDIR)/%,%,$(SYS_MANPAGES))
+#SYS_HTMLPAGES:=$(addsuffix .html,$(SYS_MANPAGES)) index.html
 
 ### post
 ifneq ($(POST_BUILD),)

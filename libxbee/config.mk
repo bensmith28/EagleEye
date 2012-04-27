@@ -3,7 +3,8 @@
 ### system install directories
 SYS_LIBDIR:=    /usr/lib
 SYS_INCDIR:=    /usr/include
-SYS_MANDIR:=    /usr/share/man
+#SYS_MANDIR:=    /usr/share/man
+SYS_MANDIR:=    ./tmp
 SYS_GROUP:=     root
 SYS_USER:=      root
 
