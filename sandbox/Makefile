@@ -119,7 +119,7 @@ rssi_test: ${RSSI_OBJS}
 
 xbee_test: ${XBEE_OBJS}
 	@echo "[LD] $@"
-	$(CC) $(LDFLAGS) -lpthread -lxbee -lrt -o $@ $^
+	$(CC) $(LDFLAGS) -L ../libxbee/lib -lpthread -lxbee -lrt -o $@ $^
 
 .PHONY: %.d
 %.d: ;

@@ -17,6 +17,7 @@ int main(int argc, char** argv)
 	struct xbee_conAddress *add;
 	struct xbee_pkt *pkt;
     int timeout = 0;
+    xbee_err err = 0;
 
     /* setup libxbee */
 	if ((xbee_setup(&xbee, "xbee1", "/dev/ttyS0", 9600)) != XBEE_ENONE) {
@@ -25,19 +26,20 @@ int main(int argc, char** argv)
 		exit(1);
 	}
 	
-	if(NULL == (con = malloc(sizeof(xbee_con)))
+	if(NULL == (con = malloc(sizeof(con))))
 	{
-	    printf("Failure to allocate for xbee_con\n")
+	    printf("Failure to allocate for xbee_con\n");
+	    exit(1);
+	}
+    //con = NULL;
+	
+	if(NULL == (add = malloc(sizeof(add))))
+	{
+	    printf("Failure to allocate for xbee_conAddress\n");
 	    exit(1);
 	}
 	
-	if(NULL == (add = malloc(sizeof(xbee_conAddress)))
-	{
-	    printf("Failure to allocate for xbee_conAddress\n")
-	    exit(1);
-	}
-	
-	if(NULL == (pkt = malloc(sizeof(xbee_pkt)))
+	if(NULL == (pkt = malloc(sizeof(pkt))))
 	{
 	    printf("Failure to allocate for xbee_pkt\n");
 	    exit(1);
@@ -47,15 +49,16 @@ int main(int argc, char** argv)
 	add->addr16[0] = 0x00;
 	add->addr16[1] = 0x01;
 	
-	if(xbee_conNew(xbee, &con, "16-bit Data", add) != XBEE_ENONE)
+	if((err = xbee_conNew(xbee, &con, "16-bit Data", add)) != XBEE_ENONE)
 	{
 	    printf("Failed to initiate connection\n");
+        printf("Error Desc.: %s\n", xbee_errorToStr(err));
 	    exit(1);
 	}
 
     do
     {
-        if(xbee_conRx(
+        //if(xbee_conRx(
     } while(++timeout < 10);
     
     if(NULL != pkt)
