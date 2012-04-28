@@ -1,6 +1,6 @@
 /*************************************************
- * Designed to test communications with the xbee
- * on ttyS0
+ * Designed to test communications with the xbee *
+ * on ttyS0                                      *
  ************************************************/
  
 #include <stdio.h>
@@ -48,12 +48,19 @@ int main(int argc, char** argv)
 	add->addr16_enabled = 1;
 	add->addr16[0] = 0x00;
 	add->addr16[1] = 0x01;
+
+    if((err = xbee_validate(xbee)) != XBEE_ENONE)
+    {
+        printf("Invalid xbee handle.\n");
+        printf("ERR: %s\n", xbee_errorToStr(err));
+        exit(1);
+    }
 	
 	if((err = xbee_conNew(xbee, &con, "16-bit Data", add)) != XBEE_ENONE)
 	{
 	    printf("Failed to initiate connection\n");
         printf("Error Desc.: %s\n", xbee_errorToStr(err));
-	    exit(1);
+        exit(1);
 	}
 
     do
