@@ -1,6 +1,6 @@
 /*************************************************
  * Designed to test communications with the xbee *
- * on ttyS0                                      *
+ * on ttyS0    aaaa                                  *
  ************************************************/
  
 #include <stdio.h>
