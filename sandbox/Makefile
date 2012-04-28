@@ -42,7 +42,7 @@ APP_NAMES = evnt_test \
             madc_test \
             mjpg_test \
             pwm_test \
-            rssi_test\
+            rssi_test \
 			xbee_test
 
 EVNT_OBJS = evnt_test.o
@@ -75,7 +75,8 @@ OBJ_FILES = ${EVNT_OBJS} \
             ${MJPG_OBJS} \
             ${PWM_OBJS} \
             ${RSSI_OBJS} \
-			$(XBEE_OBJS}
+			${XBEE_OBJS}
+
 DEP_FILES = $(strip $(OBJ_FILES:.o=.d))
 
 all: ${APP_NAMES}
@@ -116,9 +117,9 @@ rssi_test: ${RSSI_OBJS}
 	@echo "[LD] $@"
 	$(CC) $(LDFLAGS) -lpthread -o $@ $^
 
-xbee_test: $XBEE_OBJS}
+xbee_test: ${XBEE_OBJS}
 	@echo "[LD] $@"
-	$(CC) $LDFLAGS) -lpthread -lxbee -o $@ $^
+	$(CC) $(LDFLAGS) -lpthread -lxbee -lrt -o $@ $^
 
 .PHONY: %.d
 %.d: ;

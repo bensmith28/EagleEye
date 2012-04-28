@@ -1,1 +1,3 @@
-video_uvc.o: video_uvc.c v4l2uvc.h video_uvc.h utility.h
+../uav-control/video_uvc.o: ../uav-control/video_uvc.c \
+  ../uav-control/v4l2uvc.h ../uav-control/video_uvc.h \
+  ../uav-control/utility.h

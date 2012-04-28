@@ -1,1 +1,2 @@
-readwritejpeg.o: readwritejpeg.c readwritejpeg.h
+../uav-control/readwritejpeg.o: ../uav-control/readwritejpeg.c \
+  ../uav-control/readwritejpeg.h
