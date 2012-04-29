@@ -1,6 +1,6 @@
 /*************************************************
  * Designed to test communications with the xbee *
- * on ttyS0                                      *
+ * on ttyS0    aaaa                                  *
  ************************************************/
  
 #include <stdio.h>
@@ -55,6 +55,21 @@ int main(int argc, char** argv)
         printf("Invalid xbee handle.\n");
         printf("ERR: %s\n", xbee_errorToStr(err));
         exit(1);
+    }
+    
+    {
+        char **types;
+        int i;
+
+        /* initialize xbee, using xbee_setup() */
+
+        if (xbee_conGetTypes(xbee, &types) != XBEE_ENONE) return;
+
+        for (i = 0; types[i]; i++) {
+            printf("type %d: %s\n", i, types[i]);
+        }
+
+        free(types);
     }
 	
 	if((err = xbee_conNew(xbee, &con, "16-bit Data", add)) != XBEE_ENONE)
