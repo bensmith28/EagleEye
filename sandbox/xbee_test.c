@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 
         /* initialize xbee, using xbee_setup() */
 
-        if (xbee_conGetTypes(xbee, &types) != XBEE_ENONE) return;
+        if (xbee_conGetTypes(xbee, &types) != XBEE_ENONE) exit(1);
 
         for (i = 0; types[i]; i++) {
             printf("type %d: %s\n", i, types[i]);
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
         printf("Error Desc.: %s\n", xbee_errorToStr(err));
         exit(1);
 	}
-qq
+
     do
     {
 			printf("TEST");
