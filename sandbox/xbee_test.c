@@ -48,6 +48,7 @@ int main(int argc, char** argv)
 	add->addr16_enabled = 1;
 	add->addr16[0] = 0x00;
 	add->addr16[1] = 0x01;
+	
 
     if((err = xbee_validate(xbee)) != XBEE_ENONE)
     {
@@ -62,9 +63,10 @@ int main(int argc, char** argv)
         printf("Error Desc.: %s\n", xbee_errorToStr(err));
         exit(1);
 	}
-
+qq
     do
     {
+			printf("TEST");
         //if(xbee_conRx(
     } while(++timeout < 10);
     
