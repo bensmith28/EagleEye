@@ -347,6 +347,14 @@ static void *auto_imu_thread(void *arg)
             fprintf(stderr, "signal.roll = %f\n", signal.roll);
             fc_control(&signal, VCM_AXIS_ROLL);
         }
+		
+        if (!(axes & VCM_AXIS_YAW)) {
+            // compute PID result for yaw.
+            signal.yaw = pid_update(&globals.pid_yaw, angles[IMU_yaw]);
+            signal.yaw = CLAMP(signal.yaw, -1.0f, 1.0f);
+            fprintf(stderr, "signal.yaw = %f\n", signal.yaw);
+            fc_control(&signal, VCM_AXIS_YAW);
+        }
         
         pthread_mutex_unlock(&globals.pid_lock);
     }
@@ -358,7 +366,7 @@ static void *auto_imu_thread(void *arg)
 // -----------------------------------------------------------------------------
 static void *auto_yaw_thread(void *arg)
 {
-    int axes, vcm_type;
+    /*int axes, vcm_type;
     ctl_sigs_t signal;
     track_coords_t tc;
 
@@ -404,7 +412,7 @@ static void *auto_yaw_thread(void *arg)
     }
 
     syslog(LOG_INFO, "auto_yaw_thread exiting");
-    pthread_exit(NULL);
+    pthread_exit(NULL);*/
 }
 
 // -----------------------------------------------------------------------------

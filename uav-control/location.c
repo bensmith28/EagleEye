@@ -27,11 +27,16 @@ typedef struct location_args
     pthread_t       inertial_thread;  // handle to IMU location estimation thread
     unsigned int    radio_rate;
     unsigned int    inertial_rate;
+	location_coords_t* waypoint_list; // List of waypoints.
+	unsigned int	waypoint_current;	// Next waypoint in the helicopter's path.
+	unsigned int	waypoint_end;		// Location to add the next waypoint.
     pthread_mutex_t lock;
     pthread_mutex_t radio_lock;
     pthread_cond_t  radio_cond;
     pthread_mutex_t inertial_lock;
     pthread_cond_t  inertial_cond;
+	pthread_mutex_t list_lock;
+	pthread_cond_t  list_cond;
 } location_args_t;
 
 static location_args_t globals;
@@ -232,6 +237,9 @@ int location_init(client_info_t *client)
         return 0;
     }
 
+	// Allocate space for the waypoint list.
+	globals.waypoint_list = malloc(20 * sizeof(location_coords_t));
+	
     // zero out all globals
     memset(&globals, 0, sizeof(globals));
 
@@ -269,6 +277,16 @@ int location_init(client_info_t *client)
         return 0;
     }
 
+    if (0 != (rc = pthread_mutex_init(&globals.list_lock, NULL))) {
+        syslog(LOG_ERR, "error creating waypoint list mutex (%d)", rc);
+        return 0;
+    }
+
+    if (0 != (rc = pthread_cond_init(&globals.list_cond, NULL))) {
+        syslog(LOG_ERR, "error creating waypoint list event condition (%d)", rc);
+        return 0;
+    }
+
     // create and kick off the radio location thread
     pthread_create(&globals.radio_thread, 0, radio_thread, &globals);
     pthread_detach(globals.radio_thread);
@@ -287,6 +305,11 @@ void location_shutdown(void)
         syslog(LOG_INFO, "calling colordetect_shutdown prior to init\n");
         return;
     }
+	
+	// Free the allocated space for the waypoint list.
+	pthread_mutex_lock(&globals.list_lock);
+	free(globals.waypoint_list);
+	pthread_mutex_unlock(&globals.list_lock);
 
     globals.running = 0;
     pthread_cancel(globals.radio_thread);
@@ -296,6 +319,8 @@ void location_shutdown(void)
     pthread_cond_destroy(&globals.radio_cond);
     pthread_mutex_destroy(&globals.inertial_lock);
     pthread_cond_destroy(&globals.inertial_cond);
+	pthread_mutex_destroy(&globals.list_lock);
+	pthread_cond_destroy(&globals.list_cond);
 }
 
 // -----------------------------------------------------------------------------
@@ -389,4 +414,62 @@ int location_inertial_read_state(location_coords_t *coords, access_mode_t mode)
     pthread_mutex_unlock(&globals.inertial_lock);
     return 1;
 }
+
+/*
+ * Adds a new waypoint to the list.
+ */
+void add_waypoint(location_coords_t *new_waypoint)
+{
+	location_coords_t waypoint;
+	pthread_mutex_lock(&globals.list_lock);
+	waypoint = *new_waypoint;
+	waypoint_list[waypoint_end] = waypoint;
+	waypoint_next++;
+	pthread_mutex_unlock(&globals.list_lock);
+}
+
+/*
+ * Clears the list of waypoints on the helicopter.
+ */
+void clear_waypoints()
+{
+	pthread_mutex_lock(&globals.list_lock);
+	memset(globals.waypoint_list, 0, sizeof(waypoint_list));
+	pthread_mutex_unlock(&globals.list_lock);
+}
+
+/*
+ * Gets the next waypoint.
+ */
+location_coords_t* get_next_waypoint()
+{
+	location_coords_t* next_waypoint;
+	pthread_mutex_lock(&globals.list_lock);
+	next_waypoint = &globals.waypoint_list[current_waypoint];
+	pthread_mutes_unlock(&globals.list_lock);
+	return next_waypoint;
+}
+
+/*
+ * Increments the current waypoint index.
+ */
+void increment_waypoint_index()
+{
+	pthread_mutex_lock(&list_lock);
+	waypoint_current = (waypoint_current + 1) % waypoint_end;
+	pthread_mutex_unlock(&list_lock);
+}
+
+/*
+ * Returns the current location as estimated by the Xbee radio.
+ */
+location_coords_t get_current_location()
+{
+	location_coords_t current_location;
+	pthread_mutex_lock(&radio_lock);
+	current_location = globals.radio_coords;
+	pthread_mutex_unlock(&radio_lock);
+	return current_location;
+}
+
 

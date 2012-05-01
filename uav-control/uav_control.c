@@ -370,6 +370,7 @@ void run_server(imu_data_t *imu, const char *port)
     ctl_sigs_t client_sigs = { 0 };
     float curr_alt, pid_val, pid_params[PID_PARAM_COUNT] = { 0 };
     float angles[3] = { 0 };
+	location_coords_t new_waypoint;
 
     memset(&info, 0, sizeof(info));
     info.ai_family   = AF_UNSPEC;
@@ -711,6 +712,33 @@ void run_server(imu_data_t *imu, const char *port)
                         pid_params[PID_PARAM_KD], pid_params[PID_PARAM_SP],
                         cmd_buffer[PKT_GPIDS_AXIS]);
                 break;
+			case CLIENT_REQ_POS:
+				// Send a packet to the client containing the current position of the helicopter.
+				// State is currently defaulting to known.
+				location_coords_t current_location = get_current_location();
+				cmd_buffer[PKT_COMMAND]   = SERVER_ACK_POS;
+				cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
+				cmd_buffer[PKT_POS_STATE] = POS_STATE_KNOWN;
+				cmd_buffer[PKT_POS_X]     = current_location.x;
+				cmd_buffer[PKT_POS_Y]     = current_location.y;
+				send_packet(&g_client, cmd_buffer, PKT_POS_LENGTH);
+				break;
+			case CLIENT_REQ_POSEN:
+				// Turn on the location services.
+				// Not sure if I should turn on the inertial location stuff as well.
+				location_radio_enable();
+				break;
+			case CLIENT_REQ_CLR_WPTS:
+				// Clear the current list of waypoints from the helicopter.
+				clear_waypoints();
+				break;
+			case CLIENT_REQ_NEW_WPT:
+				// Add a new waypoint to the current list on the helicopter.
+				new_waypoint.detected = 0;
+				new_waypoint.x = cmd_buffer[PKT_NEW_WPT_X];
+				new_waypoint.y = cmd_buffer[PKT_NEW_WPT_Y];
+				add_waypoint(&new_waypoint);
+				break;
             default:
                 // dump a reasonable number of entries for debugging purposes
                 syslog(LOG_ERR, "invalid client command (C:%d L:%d 0:%d 1:%d)",

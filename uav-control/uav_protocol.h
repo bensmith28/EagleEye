@@ -32,8 +32,8 @@
 #define SERVER_UPDATE_STATE     14
 #define SERVER_ACK_TCE          15   // acknowledge track control enable
 #define SERVER_ACK_CTE          16   // acknowledge track control enable
-#define SERVER_UPDATE_LOCATION  17   // send updated location state information
-f
+#define SERVER_ACK_POS          17   // send updated location state information
+
 // Packet commands from client to server
 
 #define CLIENT_ACK_IDENT        0   // identify self to server
@@ -56,8 +56,9 @@ f
 #define CLIENT_REQ_TCE          17  // request Tracking Control Enable
 #define CLIENT_REQ_CTE          18  // request Color Tracking Enable
 #define CLIENT_REQ_POS          19  // request current position
-#define CLIENT_REQ_POSE         20  // request Location Service Enable
+#define CLIENT_REQ_POSEN        20  // request Location Service Enable
 #define CLIENT_REQ_NEW_WPT      21  // request addition of new waypoint
+#define CLIENT_REQ_CLR_WPTS     22  // Request that the current list of waypoints be cleared.
 
 // General packet offsets
 

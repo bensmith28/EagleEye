@@ -48,5 +48,15 @@ int location_radio_get_enable();
 // return current location enable state for radio
 int location_inertial_get_enable();
 
+void add_waypoint(location_coords_t *new_waypoint)
+
+void clear_waypoints()
+
+location_coords_t* get_next_waypoint()
+
+void increment_waypoint_index()
+
+location_coords_t get_current_location()
+
 #endif // _UAV_location__H_
 
