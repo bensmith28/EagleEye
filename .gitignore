@@ -15,3 +15,8 @@
 # SVN Files
 ###########
 *.svn
+
+# Temp Files
+############
+*~
+*.swp
