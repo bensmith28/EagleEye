@@ -742,6 +742,10 @@ void run_server(imu_data_t *imu, const char *port)
 				new_waypoint.y = cmd_buffer[PKT_NEW_WPT_Y];
 				add_waypoint(&new_waypoint);
 				break;
+			case CLIENT_REQ_SHUTDOWN:
+				// Exit the client gracefully.
+				close_client(&g_client);
+				return;
             default:
                 // dump a reasonable number of entries for debugging purposes
                 syslog(LOG_ERR, "invalid client command (C:%d L:%d 0:%d 1:%d)",

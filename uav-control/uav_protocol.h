@@ -59,6 +59,7 @@
 #define CLIENT_REQ_POSEN        20  // request Location Service Enable
 #define CLIENT_REQ_NEW_WPT      21  // request addition of new waypoint
 #define CLIENT_REQ_CLR_WPTS     22  // Request that the current list of waypoints be cleared.
+#define CLIENT_REQ_SHUTDOWN     23  // Request the shutdown of the UAV control program.
 
 // General packet offsets
 
