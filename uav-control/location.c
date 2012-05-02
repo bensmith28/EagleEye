@@ -420,11 +420,9 @@ int location_inertial_read_state(location_coords_t *coords, access_mode_t mode)
  */
 void add_waypoint(location_coords_t *new_waypoint)
 {
-	location_coords_t waypoint;
 	pthread_mutex_lock(&globals.list_lock);
-	waypoint = *new_waypoint;
-	waypoint_list[waypoint_end] = waypoint;
-	waypoint_next++;
+    memcpy(&(globals.waypoint_list[globals.waypoint_end]), new_waypoint, sizeof(location_coords_t));
+	globals.waypoint_end++;
 	pthread_mutex_unlock(&globals.list_lock);
 }
 
@@ -433,8 +431,14 @@ void add_waypoint(location_coords_t *new_waypoint)
  */
 void clear_waypoints()
 {
+    int index = 0;
 	pthread_mutex_lock(&globals.list_lock);
-	memset(globals.waypoint_list, 0, sizeof(waypoint_list));
+    do
+    {
+        memset(&(globals.waypoint_list[index]), 0, sizeof(location_coords_t));
+    } while(++index < globals.waypoint_end);
+    globals.waypoint_end = 0;
+    globals.waypoint_current = 0;
 	pthread_mutex_unlock(&globals.list_lock);
 }
 
@@ -444,9 +448,11 @@ void clear_waypoints()
 location_coords_t* get_next_waypoint()
 {
 	location_coords_t* next_waypoint;
+    next_waypoint = malloc(sizeof(location_coords_t));
+
 	pthread_mutex_lock(&globals.list_lock);
-	next_waypoint = &globals.waypoint_list[current_waypoint];
-	pthread_mutes_unlock(&globals.list_lock);
+    memcpy(next_waypoint, &(globals.waypoint_list[globals.waypoint_current]), sizeof(location_coords_t));
+	pthread_mutex_unlock(&globals.list_lock);
 	return next_waypoint;
 }
 
@@ -455,20 +461,21 @@ location_coords_t* get_next_waypoint()
  */
 void increment_waypoint_index()
 {
-	pthread_mutex_lock(&list_lock);
-	waypoint_current = (waypoint_current + 1) % waypoint_end;
-	pthread_mutex_unlock(&list_lock);
+	pthread_mutex_lock(&(globals.list_lock));
+	globals.waypoint_current = (globals.waypoint_current + 1) % globals.waypoint_end;
+	pthread_mutex_unlock(&(globals.list_lock));
 }
 
 /*
  * Returns the current location as estimated by the Xbee radio.
  */
-location_coords_t get_current_location()
+location_coords_t* get_current_location()
 {
-	location_coords_t current_location;
-	pthread_mutex_lock(&radio_lock);
-	current_location = globals.radio_coords;
-	pthread_mutex_unlock(&radio_lock);
+	location_coords_t* current_location;
+    current_location = malloc(sizeof(location_coords_t));
+	pthread_mutex_lock(&(globals.radio_lock));
+    memcpy(current_location, &(globals.radio_coords), sizeof(location_coords_t));
+	pthread_mutex_unlock(&(globals.radio_lock));
 	return current_location;
 }
 

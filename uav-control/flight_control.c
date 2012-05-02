@@ -350,7 +350,7 @@ static void *auto_imu_thread(void *arg)
 		
         if (!(axes & VCM_AXIS_YAW)) {
             // compute PID result for yaw.
-            signal.yaw = pid_update(&globals.pid_yaw, angles[IMU_yaw]);
+            signal.yaw = pid_update(&globals.pid_yaw, angles[IMU_YAW]);
             signal.yaw = CLAMP(signal.yaw, -1.0f, 1.0f);
             fprintf(stderr, "signal.yaw = %f\n", signal.yaw);
             fc_control(&signal, VCM_AXIS_YAW);
@@ -412,7 +412,8 @@ static void *auto_yaw_thread(void *arg)
     }
 
     syslog(LOG_INFO, "auto_yaw_thread exiting");
-    pthread_exit(NULL);*/
+    */
+    pthread_exit(NULL);
 }
 
 // -----------------------------------------------------------------------------

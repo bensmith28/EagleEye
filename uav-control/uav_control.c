@@ -198,7 +198,7 @@ static void *location_mon_thread(void *arg)
 
         if (coords.detected) {
             // we've detected an object, send the updated bounding box
-            cmd_buffer[PKT_COMMAND]   = SERVER_UPDATE_LOCATION;
+            cmd_buffer[PKT_COMMAND]   = SERVER_ACK_POS;
             cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
             cmd_buffer[PKT_CTS_STATE] = POS_STATE_KNOWN;
             cmd_buffer[PKT_POS_X]     = (uint32_t)coords.x;
@@ -214,7 +214,7 @@ static void *location_mon_thread(void *arg)
         else if (was_tracking) {
             // this means we were tracking, but lost our target. tell the client
             memset(cmd_buffer, 0, PKT_POS_LENGTH);
-            cmd_buffer[PKT_COMMAND]   = SERVER_UPDATE_LOCATION;
+            cmd_buffer[PKT_COMMAND]   = SERVER_ACK_POS;
             cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
             cmd_buffer[PKT_POS_STATE] = POS_STATE_UNKNOWN;
             send_packet(&g_client, cmd_buffer, PKT_CTS_LENGTH);
@@ -715,18 +715,21 @@ void run_server(imu_data_t *imu, const char *port)
 			case CLIENT_REQ_POS:
 				// Send a packet to the client containing the current position of the helicopter.
 				// State is currently defaulting to known.
-				location_coords_t current_location = get_current_location();
-				cmd_buffer[PKT_COMMAND]   = SERVER_ACK_POS;
-				cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
-				cmd_buffer[PKT_POS_STATE] = POS_STATE_KNOWN;
-				cmd_buffer[PKT_POS_X]     = current_location.x;
-				cmd_buffer[PKT_POS_Y]     = current_location.y;
-				send_packet(&g_client, cmd_buffer, PKT_POS_LENGTH);
+                {
+				    location_coords_t* current_location = get_current_location();
+				    cmd_buffer[PKT_COMMAND]   = SERVER_ACK_POS;
+				    cmd_buffer[PKT_LENGTH]    = PKT_POS_LENGTH;
+				    cmd_buffer[PKT_POS_STATE] = POS_STATE_KNOWN;
+				    cmd_buffer[PKT_POS_X]     = current_location->x;
+				    cmd_buffer[PKT_POS_Y]     = current_location->y;
+                    free(current_location);
+				    send_packet(&g_client, cmd_buffer, PKT_POS_LENGTH);
+                }
 				break;
 			case CLIENT_REQ_POSEN:
 				// Turn on the location services.
 				// Not sure if I should turn on the inertial location stuff as well.
-				location_radio_enable();
+				location_radio_enable(1);
 				break;
 			case CLIENT_REQ_CLR_WPTS:
 				// Clear the current list of waypoints from the helicopter.
