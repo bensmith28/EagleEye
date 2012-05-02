@@ -946,7 +946,7 @@ int main(int argc, char *argv[])
             syslog(LOG_INFO, "color tracking not possible without video");
         }
     }
-    
+    /*
     // initialize location service subsystem
     if (!opts.no_location) {
         // make a note that tracking isn't possible with video
@@ -964,7 +964,7 @@ int main(int argc, char *argv[])
             syslog(LOG_ERR, "failed to create location service monitor thread");
             uav_shutdown(EXIT_FAILURE);
         }
-    }
+    }*/
 
     // initialize adc channels for battery monitoring
     if (!opts.no_adc) {
@@ -980,6 +980,7 @@ int main(int argc, char *argv[])
             uav_shutdown(EXIT_FAILURE);
         }
     }
+	printf("Made it to run server");
     
     // server entry point
     run_server(&g_imu, port_str);
