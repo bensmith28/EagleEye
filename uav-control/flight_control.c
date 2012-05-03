@@ -473,7 +473,9 @@ static void *dr_landing_thread(void *arg)
         if (altitude < 10.0f)
             break;
 
-        control.alt -= 0.0004f;
+        // Rate of descent controlled here
+        // control.alt -= 0.0004f;
+        control.alt -= 0.0002f;
         fc_control(&control, VCM_AXIS_ALT);
     }
     syslog(LOG_INFO, "dr_landing_thread: done dropping throttle");
