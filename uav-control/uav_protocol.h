@@ -33,6 +33,8 @@
 #define SERVER_ACK_TCE          15   // acknowledge track control enable
 #define SERVER_ACK_CTE          16   // acknowledge track control enable
 #define SERVER_ACK_POS          17   // send updated location state information
+#define SERVER_ACK_FORWARD      18   // acknowledge command for forward
+#define SERVER_ACK_HOVER        19   // acknowledge command to hover
 
 // Packet commands from client to server
 
@@ -60,6 +62,8 @@
 #define CLIENT_REQ_NEW_WPT      21  // request addition of new waypoint
 #define CLIENT_REQ_CLR_WPTS     22  // Request that the current list of waypoints be cleared.
 #define CLIENT_REQ_SHUTDOWN     23  // Request the shutdown of the UAV control program.
+#define CLIENT_REQ_FORWARD      24  // Request movement forward
+#define CLIENT_REQ_HOVER        25  // Request a return to flight state hover
 
 // General packet offsets
 
