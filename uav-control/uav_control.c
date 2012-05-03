@@ -185,6 +185,7 @@ static void *track_mon_thread(void *arg)
 // -----------------------------------------------------------------------------
 // Wake up whenever the location service subsystem produces an updated location
 // state. Transmit the location status back to the UI.
+/*
 static void *location_mon_thread(void *arg)
 {
     uint32_t cmd_buffer[16];
@@ -226,6 +227,7 @@ static void *location_mon_thread(void *arg)
 
     pthread_exit(NULL);
 }
+*/
 
 // -----------------------------------------------------------------------------
 // Wake up whenever the flight subsystem changes state, send update packet.
